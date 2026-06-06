@@ -1,0 +1,70 @@
+{
+  "entities": {
+    "Tool": {
+      "title": "Tool",
+      "description": "An inventory item or tool available for rent.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique tool identifier" },
+        "name": { "type": "string", "description": "Name of the tool" },
+        "description": { "type": "string", "description": "Short description of the tool" },
+        "category": { "type": "string", "description": "Category (e.g., Power Tools, Hand Tools, Gardening)" },
+        "serialNumber": { "type": "string", "description": "Serial number" },
+        "pricePerDay": { "type": "number", "description": "Rental price per single day in currency" },
+        "status": { "type": "string", "enum": ["available", "rented", "maintenance"], "description": "Current status of the tool" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["id", "name", "category", "serialNumber", "pricePerDay", "status"]
+    },
+    "Rental": {
+      "title": "Rental",
+      "description": "A rental agreement for a specific tool and client with rental dates.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique rental identifier" },
+        "toolId": { "type": "string", "description": "Reference to the rented tool" },
+        "toolName": { "type": "string", "description": "Preserved name of the tool at renting" },
+        "clientName": { "type": "string", "description": "Representative client full name" },
+        "clientPhone": { "type": "string", "description": "Client phone number for notifications" },
+        "startDate": { "type": "string", "format": "date", "description": "Rental lease start date" },
+        "endDate": { "type": "string", "format": "date", "description": "Scheduled return date" },
+        "returnedAt": { "type": "string", "format": "date-time", "description": "Optional actual return time" },
+        "totalPrice": { "type": "number", "description": "Total expected/paid rental cost" },
+        "status": { "type": "string", "enum": ["active", "returned", "overdue"], "description": "Rental progress state" },
+        "calendarEventId": { "type": "string", "description": "Saves the associated Google Calendar Event ID" },
+        "userId": { "type": "string", "description": "The UID of the user who recorded this rental" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Rental log creation time" }
+      },
+      "required": ["id", "toolId", "toolName", "clientName", "clientPhone", "startDate", "endDate", "totalPrice", "status", "userId"]
+    },
+    "SMSLog": {
+      "title": "SMS Log",
+      "description": "Log of sent return reminder SMS to clients.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Log identifier" },
+        "rentalId": { "type": "string", "description": "Associated rental identifier" },
+        "clientName": { "type": "string", "description": "Client's name" },
+        "clientPhone": { "type": "string", "description": "Client's phone number" },
+        "message": { "type": "string", "description": "SMS text content" },
+        "sentAt": { "type": "string", "format": "date-time", "description": "Timestamp when the reminder was issued" },
+        "status": { "type": "string", "enum": ["sent", "delivered", "failed"], "description": "Simulated delivery status" }
+      },
+      "required": ["id", "rentalId", "clientName", "clientPhone", "message", "sentAt", "status"]
+    }
+  },
+  "firestore": {
+    "/tools/{toolId}": {
+      "schema": "Tool",
+      "description": "Collection of all rentable tools cataloged in the store."
+    },
+    "/rentals/{rentalId}": {
+      "schema": "Rental",
+      "description": "Collection of rental logs linked to specific users."
+    },
+    "/smsLogs/{logId}": {
+      "schema": "SMSLog",
+      "description": "Log records of SMS return auto reminders."
+    }
+  }
+}

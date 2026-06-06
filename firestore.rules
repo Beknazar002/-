@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    match /tools/{toolId} {
+      allow read, list: if isSignedIn();
+      allow create: if isSignedIn() && isValidTool(incoming());
+      allow update: if isSignedIn() && isValidTool(incoming());
+      allow delete: if isSignedIn();
+    }
+    
+    match /rentals/{rentalId} {
+      allow read, get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidRental(incoming()) && incoming().userId == request.auth.uid;
+      allow update: if isSignedIn() && isValidRental(incoming()) && incoming().userId == request.auth.uid && existing().userId == request.auth.uid;
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+    
+    match /smsLogs/{logId} {
+      allow read, list: if isSignedIn();
+      allow create: if isSignedIn() && isValidSMSLog(incoming());
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function incoming() {
+      return request.resource.data;
+    }
+    function existing() {
+      return resource.data;
+    }
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    function isValidTool(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.name is string && data.name.size() <= 100
+        && data.category is string && data.category.size() <= 100
+        && data.serialNumber is string && data.serialNumber.size() <= 50
+        && data.pricePerDay is number && data.pricePerDay >= 0
+        && data.status in ['available', 'rented', 'maintenance'];
+    }
+    function isValidRental(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.toolId is string && data.toolId.size() <= 128
+        && data.toolName is string && data.toolName.size() <= 100
+        && data.clientName is string && data.clientName.size() <= 100
+        && data.clientPhone is string && data.clientPhone.size() <= 30
+        && data.startDate is string && data.startDate.size() <= 40
+        && data.endDate is string && data.endDate.size() <= 40
+        && data.totalPrice is number && data.totalPrice >= 0
+        && data.status in ['active', 'returned', 'overdue']
+        && data.userId is string && data.userId.size() <= 128;
+    }
+    function isValidSMSLog(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.rentalId is string && data.rentalId.size() <= 128
+        && data.clientName is string && data.clientName.size() <= 100
+        && data.clientPhone is string && data.clientPhone.size() <= 30
+        && data.message is string && data.message.size() <= 500
+        && data.sentAt is string && data.sentAt.size() <= 40
+        && data.status in ['sent', 'delivered', 'failed'];
+    }
+  }
+}

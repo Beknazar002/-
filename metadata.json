@@ -1,0 +1,6 @@
+{
+  "name": "Tool Rental Tracker",
+  "description": "A comprehensive tool rental tracking management system with real-time cloud sync, offline support, return notifications, debt reports, and Google Calendar synchronization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
